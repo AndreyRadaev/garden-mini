@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1115">
+  <title>GARDEN — показатели кофеен</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="brand">GARDEN</p>
+      <h1>Показатели кофеен</h1>
+      <p class="muted" id="updated">Защищённые данные · ожидаем пароль</p>
+    </header>
+    <form id="unlock" class="unlock">
+      <label for="password">Пароль для просмотра</label>
+      <div class="unlock-row"><input id="password" type="password" autocomplete="off" required><button type="submit">Открыть</button></div>
+      <p class="muted">Пароль используется только на вашем устройстве и не отправляется на сайт.</p>
+    </form>
+    <p id="message" class="message" role="alert"></p>
+    <div id="content" hidden></div>
+  </main>
+</body>
+</html>
+
