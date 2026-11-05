@@ -3,15 +3,7 @@
   const format = new Intl.NumberFormat('ru-RU');
   const money = value => Number.isFinite(value) ? `${format.format(Math.round(value))} ₽` : '—';
   const percent = value => Number.isFinite(value) ? `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 }).format(value)}%` : '—';
-  const bytes = value => Uint8Array.from(atob(value), char => char.charCodeAt(0));
   const node = (tag, className, value) => { const element = document.createElement(tag); element.className = className; if (value != null) element.textContent = value; return element; };
-  async function decrypt(envelope, password) {
-    if (envelope.version !== 1) throw new Error('Неизвестный формат данных');
-    const pass = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
-    const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: bytes(envelope.salt), iterations: envelope.iterations, hash: 'SHA-256' }, pass, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-    const clear = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes(envelope.iv) }, key, bytes(envelope.data));
-    return JSON.parse(new TextDecoder().decode(clear));
-  }
   function metric(label, value) { const card = node('div', 'metric'); card.append(node('div', 'metric-label', label), node('div', 'metric-value', value)); return card; }
   function render(data) {
     const content = $('content'); content.replaceChildren();
@@ -38,15 +30,19 @@
     $('updated').textContent = `Данные на ${new Intl.DateTimeFormat('ru-RU', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Yekaterinburg' }).format(updated)} · обновляются по расписанию`;
     content.hidden = false;
   }
-  $('unlock').addEventListener('submit', async event => {
-    event.preventDefault(); $('message').textContent = 'Открываем данные…';
+  async function load() {
     try {
-      const response = await fetch('./data/current.enc.json', { cache: 'no-store' });
+      const response = await fetch('./data/current.json', { cache: 'no-store' });
       if (!response.ok) throw new Error('Данные ещё не опубликованы');
-      const data = await decrypt(await response.json(), $('password').value);
-      $('password').value = '';
-      $('unlock').hidden = true; $('message').textContent = ''; render(data);
-    } catch (error) { $('message').textContent = error.name === 'OperationError' ? 'Неверный пароль' : error.message || 'Не удалось загрузить данные'; }
-  });
+      const data = await response.json();
+      if (!data.updatedAt || !data.points || !Object.keys(data.points).length) throw new Error('Неполные данные');
+      render(data);
+      $('message').textContent = '';
+    } catch (error) {
+      $('updated').textContent = 'Не удалось загрузить показатели';
+      $('message').textContent = error.message || 'Не удалось загрузить данные';
+    }
+  }
+  load();
 })();
 
