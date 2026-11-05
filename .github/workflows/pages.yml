@@ -23,12 +23,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Получить и зашифровать показатели
+      - name: Получить показатели
         env:
           DASHBOARD_ORIGIN: https://iiko-dashboard.vercel.app
           DASHBOARD_LOGIN: ${{ secrets.DASHBOARD_LOGIN }}
           DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
-          SNAPSHOT_PASSPHRASE: ${{ secrets.SNAPSHOT_PASSPHRASE }}
         run: node scripts/build-snapshot.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
